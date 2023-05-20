@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="/socket.io/socket.io.js"></script>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    Page rendered
+    <div style="height: 1000px; width: 1000px"></div>
+    <canvas
+      id="myCanvas"
+      width="1000px"
+      height="1000px"
+      style="border: 1px solid #d3d3d3"
+    >
+    </canvas>
+  </body>
+  <script>
+    const socket = io();
+    socket.on("drawing", drawLine);
+    let clicked = false;
+    let clickedCords = {};
+    document
+      .getElementsByTagName("body")[0]
+      .addEventListener("click", function (e) {
+        console.log(e.clientX, e.clientY, clickedCords, clicked);
+        if (clicked) {
+          socket.emit("drawing", { clickedCords, x: e.clientX, y: e.clientY });
+          drawLine({ x: e.clientX, y: e.clientY });
+          clicked = false;
+        } else {
+          clicked = true;
+          clickedCords = {
+            x: e.clientX,
+            y: e.clientY,
+          };
+        }
+      });
+
+    function drawLine(data) {
+      let { x, y, clickedCords } = data;
+      var c = document.getElementById("myCanvas");
+      var ctx = c.getContext("2d");
+      ctx.beginPath();
+      ctx.moveTo(clickedCords.x, clickedCords.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+  </script>
+</html>
